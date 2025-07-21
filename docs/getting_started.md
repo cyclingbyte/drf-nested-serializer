@@ -234,29 +234,25 @@ A serializer just needs to inherit from `NestedSerializer` to allow writable nes
     ```
 
 
-
-
-### Saving Data
+### Nested Data
 
 === "Omit"
     
-    > Does nothing to `nested`
-
     ```python
     data = {
-
+        # omit `nested`
 
 
 
     }
+    ```
+    ```python
     serializer = MyParentSerializer(data=data)
     if serializer.is_valid():
         instance = serializer.save()
     ```
 
-=== "`None`"
-
-    > Sets `nested` to `None`
+=== "Set to `None`"
 
     ```python
     data = {
@@ -265,31 +261,14 @@ A serializer just needs to inherit from `NestedSerializer` to allow writable nes
     
     
     }
-    serializer = MyParentSerializer(data=data)
-    if serializer.is_valid():
-        instance = serializer.save()
     ```
-
-=== "Without pk"
-
-    > Creates a new nested instance
-
     ```python
-    data = {
-        "nested": {
-        
-            "name": "John Doe",
-        }
-    }
     serializer = MyParentSerializer(data=data)
     if serializer.is_valid():
         instance = serializer.save()
     ```
-    
 
-=== "With `None` pk"
-
-    > Creates a new nested instance
+=== "Set to new"
 
     ```python
     data = {
@@ -298,14 +277,14 @@ A serializer just needs to inherit from `NestedSerializer` to allow writable nes
             "name": "John Doe",
         }
     }
+    ```
+    ```python
     serializer = MyParentSerializer(data=data)
     if serializer.is_valid():
         instance = serializer.save()
     ```
 
-=== "Only pk"
-
-    > Sets `nested` to an existing nested instance 
+=== "Set to existing"
 
     ```python
     data = {
@@ -314,35 +293,38 @@ A serializer just needs to inherit from `NestedSerializer` to allow writable nes
 
         }
     }
+    ```
+    ```python
     serializer = MyParentSerializer(data=data)
     if serializer.is_valid():
         instance = serializer.save()
     ```
 
-=== "With pk"
+=== "Set to existing and update"
 
-    > Sets `nested` to an existing nested instance and updates it
-
-    ```python
+    ```json
     data = {
         "nested": {
             "id": 3,
             "name": "John Doe",
         }
     }
+    ```
+    ```python
     serializer = MyParentSerializer(data=data)
     if serializer.is_valid():
         instance = serializer.save()
     ```
 
-### Inclusion and Exclusion
+## Inclusion and Exclusion
 
-By default all nested serializers are automatically handled, but you can explicitly specify which fields should be handled:
+If not all nested serializers should be handled, you can explicitly include or exclude fields:
 
-=== "Include all"
+=== "Include all (default)"
 
     ```python
     class MyParentSerializer(NestedSerializer):
+        ...
         class Meta:
             ...
             nested_include = "__all__" # or omitted
@@ -352,6 +334,7 @@ By default all nested serializers are automatically handled, but you can explici
 
     ```python
     class MyParentSerializer(NestedSerializer):
+        ...
         class Meta:
             ...
             nested_include = ("field_1", "field_2", ...)
@@ -361,6 +344,7 @@ By default all nested serializers are automatically handled, but you can explici
 
     ```python
     class MyParentSerializer(NestedSerializer):
+        ...
         class Meta:
             ...
             nested_exclude = "__all__"
@@ -370,24 +354,8 @@ By default all nested serializers are automatically handled, but you can explici
 
     ```python
     class MyParentSerializer(NestedSerializer):
+        ...
         class Meta:
             ...
             nested_exclude = ("field_1", "field_2", ...)
     ```
-
-
-### Remove Behavior
-
-By default removed instances are deleted. You can override that behavior with the `nested_remove_action` meta option:
-
-```python
-class MyParentSerializer(NestedSerializer):
-    class Meta:
-        ...
-        nested_remove_action = {
-            "nested": "__delete__" # to delete the removed instance
-            "nested": "__null__" # to set reverse `OneToOne`/`ForeignKey` relation to `NULL`
-        }
-
-```
-
