@@ -5,7 +5,7 @@ from django.test import TestCase
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from drf_nested_serializer.serializer import NestedSerializer
+from drf_nested_model_serializer.serializer import NestedModelSerializer
 
 
 # Models
@@ -31,7 +31,7 @@ class ChildSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ParentSerializer(NestedSerializer):
+class ParentSerializer(NestedModelSerializer):
     child = ChildSerializer()
 
     class Meta:
@@ -139,7 +139,7 @@ class ParentWithoutChildSerializer(serializers.ModelSerializer):
         exclude = ("child",)
 
 
-class ChildWithParentSerializer(NestedSerializer):
+class ChildWithParentSerializer(NestedModelSerializer):
     parent = ParentWithoutChildSerializer()
 
     class Meta:

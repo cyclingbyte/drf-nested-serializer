@@ -1,4 +1,5 @@
 {
     "files.autoSave": "onFocusChange",
-    "editor.defaultFormatter": "charliermarsh.ruff"
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.tabSize": 4
 }
