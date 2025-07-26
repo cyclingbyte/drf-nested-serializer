@@ -8,32 +8,30 @@ from rest_framework.exceptions import ValidationError
 from drf_nested_model_serializer.serializer import NestedModelSerializer
 
 
-class Child(models.Model):
+class M2OChild(models.Model):
     name = models.CharField(max_length=20)
     parent = models.ForeignKey(
-        "Parent",
+        "M2OParent",
         related_name="children",
         on_delete=models.CASCADE,
-        blank=False,
-        null=False,
     )
 
 
-class Parent(models.Model):
+class M2OParent(models.Model):
     name = models.CharField(max_length=20)
 
 
-class ChildSerializer(serializers.ModelSerializer):
+class M2OChildSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Child
+        model = M2OChild
         fields = "__all__"
 
 
-class ParentSerializer(NestedModelSerializer):
-    children = ChildSerializer(many=True)
+class M2OParentSerializer(NestedModelSerializer):
+    children = M2OChildSerializer(many=True)
 
     class Meta:
-        model = Parent
+        model = M2OParent
         fields = "__all__"
 
 
@@ -43,7 +41,7 @@ class TestOneToOneNotNullNotBlank(TestCase):
             "children": [{"name": "Child1"}, {"name": "Child2"}],
             "name": "Parent1",
         }
-        serializer = ParentSerializer(data=data)
+        serializer = M2OParentSerializer(data=data)
         assert serializer.is_valid(), serializer.errors
         parent = serializer.save()
         assert parent.children.count() == 2, (
@@ -59,6 +57,6 @@ class TestOneToOneNotNullNotBlank(TestCase):
 
     def test_create_parent_without_children_fails(self):
         data = {"name": "Parent2"}
-        serializer = ParentSerializer(data=data)
+        serializer = M2OParentSerializer(data=data)
         with pytest.raises(ValidationError):
             serializer.is_valid(raise_exception=True)
