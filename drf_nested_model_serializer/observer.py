@@ -9,8 +9,12 @@ from djangochannelsrestframework.observer.model_observer import Action
 from djangochannelsrestframework.observer.model_observer import ModelObserver
 from rest_framework.serializers import ListSerializer
 
+from drf_nested_model_serializer.serializer import NestedModelSerializer
 
-def nested_model_observer(model, serializer_class, many_to_many=False, **kwargs):
+
+def nested_model_observer(
+    model, nested_serializer, serializer_class=None, many_to_many=False, **kwargs
+):
     """
     Should be used as a method decorator eg: `@nested_model_observer(MyModel, MySerializer)`
 
@@ -19,45 +23,51 @@ def nested_model_observer(model, serializer_class, many_to_many=False, **kwargs)
     return partial(
         NestedModelObserver,
         model_cls=model,
+        nested_serializer_cls=nested_serializer,
+        partition="*",
         serializer_class=serializer_class,
         many_to_many=many_to_many,
-        **kwargs,
     )
 
 
 class NestedModelObserver(ModelObserver):
     """
-    Observer that automatically detects nested children from the serializer_class of the consumer.
+    Observer that automatically detects nested children from the `nested_serializer_cls` of the consumer.
     """
 
     def __init__(
         self,
         func,
         model_cls,
-        serializer_class,
+        nested_serializer_cls,
         partition="*",
+        serializer_class=None,
         many_to_many=False,
-        **kwargs,
     ):
         # Track pending parent updates to avoid duplicates
         self._pending_parent_updates = set()
 
-        if serializer_class is None:
+        if nested_serializer_cls is None:
             raise ValueError(
-                _("serializer_class must be provided for NestedModelObserver")
+                _("nested_serializer_cls must be provided for NestedModelObserver")
             )
+        if not hasattr(nested_serializer_cls, "_nested_serializers"):
+            raise ValueError(
+                _(
+                    "nested_serializer_cls must be a NestedModelSerializer with _nested_serializers attribute"
+                )
+            )
+        self._nested_serializer_cls = nested_serializer_cls
 
-        super().__init__(
-            func, model_cls, partition, serializer_class, many_to_many, **kwargs
-        )
+        super().__init__(func, model_cls, partition, serializer_class, many_to_many)
 
     def _connect(self):
         super()._connect()
 
-        if not self._serializer_class:
+        if not self._nested_serializer_cls:
             return
 
-        serializer = self._serializer_class()
+        serializer = self._nested_serializer_cls()
 
         for field in serializer._nested_serializers.values():
             nested_serializer = (
