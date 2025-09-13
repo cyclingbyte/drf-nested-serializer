@@ -9,8 +9,6 @@ from djangochannelsrestframework.observer.model_observer import Action
 from djangochannelsrestframework.observer.model_observer import ModelObserver
 from rest_framework.serializers import ListSerializer
 
-from drf_nested_model_serializer.serializer import NestedModelSerializer
-
 
 def nested_model_observer(
     model, nested_serializer, serializer_class=None, many_to_many=False, **kwargs

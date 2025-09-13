@@ -6,7 +6,7 @@ The only difference is that you must also provide a serializer class, which shou
 Example:
 
 ```py
-from djangochannelsrestframework.consumers import GenericAsyncAPIConsumer
+from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework.decorators import action
 from drf_nested_model_serializer.observer import nested_model_observer
 
