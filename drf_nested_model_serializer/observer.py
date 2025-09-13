@@ -95,9 +95,22 @@ class NestedModelObserver(ModelObserver):
             )
 
     def _find_fk_field(self, child_model, parent_model):
+        # Check for direct ForeignKey from child to parent
         for f in child_model._meta.fields:
-            if isinstance(f, models.ForeignKey) and f.related_model == parent_model:
+            if (
+                isinstance(f, (models.ForeignKey, models.OneToOneField))
+                and f.related_model == parent_model
+            ):
                 return f.name
+
+        # Check for reverse relationships from parent to child
+        for f in parent_model._meta.fields:
+            if (
+                isinstance(f, (models.ForeignKey, models.OneToOneField))
+                and f.related_model == child_model
+            ):
+                return f.remote_field.related_name or f.remote_field.get_accessor_name()
+
         return None
 
     def _schedule_parent_update(self, parent):
